@@ -4,6 +4,7 @@
 
 A Python 2.7 script for the Sanitas SBF70 / Silvercrest SBF75 / Beurer BF700 / BF710 / BF800 / Runtastic Libra diagnostic scales.
 
+Perhaps it works now with Python 3 as well.
 
 
 **scale.py**
