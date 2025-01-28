@@ -5,7 +5,7 @@
 '''
  * This file is part of BT-Scale (https://github.com/danielfaust/bt-scale).
  * Copyright (c) 2019 Daniel Faust.
- * 
+ *
  * This program is free software: you can redistribute it and/or modify  
  * it under the terms of the GNU General Public License as published by  
  * the Free Software Foundation, version 3.
@@ -17,6 +17,10 @@
  *
  * You should have received a copy of the GNU General Public License 
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
+'''
+
+'''
+ * Since I’m not a programmer, but I have the scale, I used AI assistance to help translate the code into Python 3. [2025-01-28]
 '''
 
 '''
