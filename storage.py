@@ -27,73 +27,73 @@ import traceback
 ##################################################################################################################
 
 def store_readout(readout):
-  store_readout_to_file(readout)
-  store_readout_to_database(readout)
-  print 'done.'
+    store_readout_to_file(readout)
+    store_readout_to_database(readout)
+    print('done.')
 
 ##################################################################################################################
 
 def store_readout_to_file(readout):
-  measurements = []
-  if 'measurements' in readout:
-    measurements = copy.deepcopy(readout['measurements'])
-  if 'measurement' in readout:
-    measurements.append(copy.deepcopy(readout['measurement']))
-  print 'storing measurements...'
-  for measurement in measurements:
-    with open('measurements-' + measurement['uid'] + '.json', 'a') as f:
-      if 'scale' in readout and 'battery' in readout['scale']:
-        # add the scale battery level to each measurement
-        measurement['battery'] = readout['scale']['battery']
-      f.write(json.dumps(measurement, sort_keys=True) + ',\n')
+    measurements = []
+    if 'measurements' in readout:
+        measurements = copy.deepcopy(readout['measurements'])
+    if 'measurement' in readout:
+        measurements.append(copy.deepcopy(readout['measurement']))
+    print('storing measurements...')
+    for measurement in measurements:
+        with open('measurements-' + measurement['uid'] + '.json', 'a', encoding='utf-8') as f:
+            if 'scale' in readout and 'battery' in readout['scale']:
+                # add the scale battery level to each measurement
+                measurement['battery'] = readout['scale']['battery']
+            f.write(json.dumps(measurement, sort_keys=True, ensure_ascii=False) + ',\n')
 
 ##################################################################################################################
 
 def store_readout_to_database(readout):
   
-  import users
-  aliases = {}
-  for alias, uid in users.USER_MAPPING.items():
-    aliases[uid] = alias
-  
-  MONGODB_HOST = '123.123.123.123'
-  MONGODB_PORT = 27017
-  
-  if MONGODB_HOST == '123.123.123.123':
-    print 'the database connection must first be configured.'
-    return
-  
-  import pymongo
-  
-  print 'connecting to database...'
-  database = pymongo.MongoClient(MONGODB_HOST, MONGODB_PORT, appname='bt-scale')['bt-scale']
-  
-  print 'storing / updating users...'
-  for user in copy.deepcopy(readout['users']):
-    if user['uid'] in aliases:
-      # add the alias to the user
-      user['alias'] = aliases[user['uid']]
-    # always overwrite the user data
-    database['users'].update({'uid':user['uid']}, {"$set" : user}, upsert=True)
-  
-  print 'storing / updating measurements...'
-  measurements = []
-  if 'measurements' in readout:
-    measurements = copy.deepcopy(readout['measurements'])
-  if 'measurement' in readout:
-    measurements.append(copy.deepcopy(readout['measurement']))
-  for measurement in measurements:
-    if 'scale' in readout and 'battery' in readout['scale']:
-      # add the scale battery level to each measurement
-      measurement['battery'] = readout['scale']['battery']
-    if measurement['uid'] in aliases:
-      # add the alias to each measurement
-      measurement['alias'] = aliases[measurement['uid']]
+    import users
+    aliases = {}
+    for alias, uid in users.USER_MAPPING.items():
+        aliases[uid] = alias
     
-    # overwrite time field with datetime object, we don't want
-    # a string in the database, but an object we can aggregate upon
-    measurement['time'] = datetime.datetime.utcfromtimestamp(measurement['timestamp'])
+    MONGODB_HOST = '123.123.123.123'
+    MONGODB_PORT = 27017
     
-    database['measurements'].update({'uid':measurement['uid'], 'timestamp':measurement['timestamp']}, {"$set" : measurement}, upsert=True)
+    if MONGODB_HOST == '123.123.123.123':
+        print('the database connection must first be configured.')
+        return
+    
+    import pymongo
+    
+    print('connecting to database...')
+    database = pymongo.MongoClient(MONGODB_HOST, MONGODB_PORT, appname='bt-scale')['bt-scale']
+    
+    print('storing / updating users...')
+    for user in copy.deepcopy(readout['users']):
+        if user['uid'] in aliases:
+            # add the alias to the user
+            user['alias'] = aliases[user['uid']]
+        # always overwrite the user data
+        database['users'].update({'uid': user['uid']}, {"$set" : user}, upsert=True)
+    
+    print('storing / updating measurements...')
+    measurements = []
+    if 'measurements' in readout:
+        measurements = copy.deepcopy(readout['measurements'])
+    if 'measurement' in readout:
+        measurements.append(copy.deepcopy(readout['measurement']))
+    for measurement in measurements:
+        if 'scale' in readout and 'battery' in readout['scale']:
+            # add the scale battery level to each measurement
+            measurement['battery'] = readout['scale']['battery']
+        if measurement['uid'] in aliases:
+            # add the alias to each measurement
+            measurement['alias'] = aliases[measurement['uid']]
+        
+        # overwrite time field with datetime object, we don't want
+        # a string in the database, but an object we can aggregate upon
+        measurement['time'] = datetime.datetime.utcfromtimestamp(measurement['timestamp'])
+        
+        database['measurements'].update({'uid': measurement['uid'], 'timestamp': measurement['timestamp']}, {"$set" : measurement}, upsert=True)
 
 ##################################################################################################################
